@@ -1,0 +1,44 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+dist/
+coverage/
+.nyc_output/
+.tmp/
+.cache/
+
+# Angular
+frontend/.angular/
+frontend/dist/
+frontend/node_modules/
+
+# Backend Node
+backend-node/node_modules/
+backend-node/dist/
+backend-node/coverage/
+
+# PHP / Composer
+backend-php/vendor/
+backend-php/.phpunit.result.cache
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.pid
+*.seed
