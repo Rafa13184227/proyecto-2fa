@@ -1,0 +1,40 @@
+<div class="setup-2fa-container">
+    <h1>Configurar autenticación en dos pasos</h1>
+    <p>Escanea el código QR con Google Authenticator o ingresa el secreto manualmente.</p>
+
+    @if (loading() && !qrCodeUri()) {
+    <p>Generando configuración...</p>
+    }
+
+    @if (error()) {
+    <p>{{ error() }}</p>
+    }
+
+    @if (qrCodeUri()) {
+    <div class="qr-section">
+        <img [src]="qrCodeUri()!" alt="Código QR para configurar 2FA" />
+    </div>
+
+    <div class="secret-section">
+        <h2>Secreto manual</h2>
+        <p>{{ secret() }}</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <label for="code">Código de verificación</label>
+        <input id="code" type="text" formControlName="code" maxlength="6" inputmode="numeric" placeholder="000000" />
+
+        @if (form.get('code')?.invalid && form.get('code')?.touched) {
+        <p>Ingresa un código válido de 6 dígitos.</p>
+        }
+
+        @if (success()) {
+        <p>{{ success() }}</p>
+        }
+
+        <button type="submit" [disabled]="loading()">
+            {{ loading() ? 'Verificando...' : 'Activar 2FA' }}
+        </button>
+    </form>
+    }
+</div>

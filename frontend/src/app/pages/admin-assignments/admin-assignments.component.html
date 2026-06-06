@@ -1,0 +1,101 @@
+<section class="assignments-container">
+    <h1>Asignar cursos</h1>
+    <p>Busca y selecciona un estudiante y un curso.</p>
+
+    @if (loadingData()) {
+    <p>Cargando estudiantes y cursos...</p>
+    }
+
+    @if (error()) {
+    <p class="error">{{ error() }}</p>
+    }
+
+    @if (!loadingData()) {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="assignment-form">
+        <div class="search-block">
+            <label for="studentSearch">Buscar estudiante</label>
+            <input id="studentSearch" type="text" [value]="studentSearch()"
+                (input)="setStudentSearch($any($event.target).value)" placeholder="Escribe nombre, correo o id" />
+
+            <div class="results-box">
+                @if (filteredStudents().length) {
+                @for (student of filteredStudents(); track student.id) {
+                <button type="button" class="result-item" (click)="selectStudent(student)">
+                    {{ student.id }} - {{ student.name }} ({{ student.email }})
+                </button>
+                }
+                } @else {
+                <p>No se encontraron estudiantes.</p>
+                }
+            </div>
+        </div>
+
+        <div class="search-block">
+            <label for="courseSearch">Buscar curso</label>
+            <input id="courseSearch" type="text" [value]="courseSearch()"
+                (input)="setCourseSearch($any($event.target).value)" placeholder="Escribe nombre, código o id" />
+
+            <div class="results-box">
+                @if (filteredCourses().length) {
+                @for (course of filteredCourses(); track course.id) {
+                <button type="button" class="result-item" (click)="selectCourse(course)">
+                    {{ course.id }} - {{ course.name }} ({{ course.code }}) - {{ course.credits }} créditos
+                </button>
+                }
+                } @else {
+                <p>No se encontraron cursos.</p>
+                }
+            </div>
+        </div>
+
+        <div class="selected-summary">
+            <p>
+                <strong>Estudiante seleccionado:</strong>
+                {{ selectedStudent() ? (selectedStudent()!.id + ' - ' + selectedStudent()!.name) : 'Ninguno' }}
+            </p>
+
+            <p>
+                <strong>Curso seleccionado:</strong>
+                {{ selectedCourse() ? (selectedCourse()!.id + ' - ' + selectedCourse()!.name + ' (' +
+                selectedCourse()!.code + ')') : 'Ninguno' }}
+            </p>
+        </div>
+
+        @if (success()) {
+        <p class="success">{{ success() }}</p>
+        }
+
+        <button type="submit" [disabled]="loading() || !selectedStudent() || !selectedCourse()">
+            {{ loading() ? 'Asignando...' : 'Asignar curso' }}
+        </button>
+    </form>
+
+    <div class="lists-preview">
+        <section>
+            <h2>Todos los estudiantes</h2>
+            @if (students().length) {
+            <ul>
+                @for (student of students(); track student.id) {
+                <li>{{ student.id }} - {{ student.name }} ({{ student.email }})</li>
+                }
+            </ul>
+            } @else {
+            <p>No hay estudiantes creados todavía.</p>
+            }
+        </section>
+
+        <section>
+            <h2>Todos los cursos</h2>
+            @if (courses().length) {
+            <ul>
+                @for (course of courses(); track course.id) {
+                <li>{{ course.id }} - {{ course.name }} ({{ course.code }})</li>
+                }
+            </ul>
+            } @else {
+            <p>No hay cursos creados todavía.</p>
+            }
+        </section>
+    </div>
+    }
+</section>

@@ -1,0 +1,76 @@
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <div>
+            <h1>Dashboard</h1>
+
+            @if (profile()) {
+            <p>
+                Bienvenido, <strong>{{ profile()?.name }}</strong> ({{ profile()?.role }})
+            </p>
+            <p>Correo: {{ profile()?.email }}</p>
+            <p>Último acceso: {{ profile()?.last_login || 'Sin registros aún' }}</p>
+            } @else if (user()) {
+            <p>
+                Bienvenido, <strong>{{ user()?.email }}</strong> ({{ user()?.role }})
+            </p>
+            } @else {
+            <p>Cargando información del usuario...</p>
+            }
+        </div>
+
+        <div class="actions">
+            <button type="button" (click)="goToSetup2FA()">
+                Configurar 2FA
+            </button>
+
+            <button type="button" (click)="logout()">
+                Cerrar sesión
+            </button>
+        </div>
+    </header>
+
+    @if (isAdmin()) {
+    <section class="admin-section">
+        <h2>Panel de administración</h2>
+        <p>Desde aquí puedes gestionar usuarios, roles y asignación de cursos.</p>
+
+        <div class="admin-actions">
+            <button type="button" (click)="goToAdminUsers()">
+                Crear y gestionar usuarios
+            </button>
+
+            <button type="button" (click)="goToAdminCourses()">
+                Crear cursos
+            </button>
+
+            <button type="button" (click)="goToAdminAssignments()">
+                Asignar cursos
+            </button>
+        </div>
+    </section>
+    } @else {
+    <section class="courses-section">
+        <h2>Mis cursos</h2>
+
+        @if (loadingCourses()) {
+        <p>Cargando cursos...</p>
+        } @else if (coursesError()) {
+        <p>{{ coursesError() }}</p>
+        } @else if (hasCourses()) {
+        <div class="courses-grid">
+            @for (course of courses(); track course.id) {
+            <article class="course-card">
+                <h3>{{ course.name }}</h3>
+                <p><strong>Código:</strong> {{ course.code }}</p>
+                <p><strong>Créditos:</strong> {{ course.credits }}</p>
+                <p><strong>Nota:</strong> {{ course.grade ?? 'Sin nota' }}</p>
+                <p><strong>Matrícula:</strong> {{ course.enrolled_at || 'Sin fecha' }}</p>
+            </article>
+            }
+        </div>
+        } @else {
+        <p>No tienes cursos registrados.</p>
+        }
+    </section>
+    }
+</div>

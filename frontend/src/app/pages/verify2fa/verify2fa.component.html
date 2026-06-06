@@ -1,0 +1,30 @@
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Verificación en dos pasos</h1>
+        <p>Ingresa el código de 6 dígitos de tu app autenticadora.</p>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+                <label for="code">Código 2FA</label>
+                <input id="code" type="text" formControlName="code" maxlength="6" inputmode="numeric"
+                    placeholder="123456" />
+
+                @if (form.get('code')?.touched && form.get('code')?.invalid) {
+                <small class="error-text">
+                    El código debe tener exactamente 6 dígitos.
+                </small>
+                }
+            </div>
+
+            @if (error()) {
+            <div class="error-box">
+                {{ error() }}
+            </div>
+            }
+
+            <button type="submit" [disabled]="loading()">
+                {{ loading() ? 'Verificando...' : 'Verificar código' }}
+            </button>
+        </form>
+    </div>
+</div>
