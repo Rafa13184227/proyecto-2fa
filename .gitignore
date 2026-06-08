@@ -10,8 +10,8 @@ yarn-error.log*
 
 # Env files
 .env
-.env.*
-!.env.example
+backend-node/.env
+backend-php/.env
 
 # Node
 node_modules/
