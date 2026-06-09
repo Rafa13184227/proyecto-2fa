@@ -1,40 +1,66 @@
-<div class="setup-2fa-container">
-    <h1>Configurar autenticación en dos pasos</h1>
-    <p>Escanea el código QR con Google Authenticator o ingresa el secreto manualmente.</p>
+<section class="setup-2fa-container">
+    <div class="setup-card">
+        <h1>Configurar autenticación en dos pasos</h1>
+        <p class="subtitle">
+            Escanea el código QR con Google Authenticator o Authy. Si no puedes escanearlo,
+            usa el secreto manual.
+        </p>
 
-    @if (loading() && !qrCodeUri()) {
-    <p>Generando configuración...</p>
-    }
+        @if (loading() && !qrCodeUri()) {
+        <div class="info-box">
+            Generando configuración de seguridad...
+        </div>
+        }
 
-    @if (error()) {
-    <p>{{ error() }}</p>
-    }
-
-    @if (qrCodeUri()) {
-    <div class="qr-section">
-        <img [src]="qrCodeUri()!" alt="Código QR para configurar 2FA" />
-    </div>
-
-    <div class="secret-section">
-        <h2>Secreto manual</h2>
-        <p>{{ secret() }}</p>
-    </div>
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <label for="code">Código de verificación</label>
-        <input id="code" type="text" formControlName="code" maxlength="6" inputmode="numeric" placeholder="000000" />
-
-        @if (form.get('code')?.invalid && form.get('code')?.touched) {
-        <p>Ingresa un código válido de 6 dígitos.</p>
+        @if (error()) {
+        <div class="alert error">
+            {{ error() }}
+        </div>
         }
 
         @if (success()) {
-        <p>{{ success() }}</p>
+        <div class="alert success">
+            {{ success() }}
+        </div>
         }
 
-        <button type="submit" [disabled]="loading()">
-            {{ loading() ? 'Verificando...' : 'Activar 2FA' }}
-        </button>
-    </form>
-    }
-</div>
+        @if (qrCodeUri()) {
+        <div class="qr-section">
+            <h2>Código QR</h2>
+            <img [src]="qrCodeUri()!" alt="Código QR para configurar 2FA" class="qr-image" />
+        </div>
+
+        <div class="secret-section">
+            <h2>Secreto manual</h2>
+            <div class="secret-box">
+                {{ secret() }}
+            </div>
+            <p class="helper-text">
+                Usa este código solo si tu aplicación autenticadora no puede escanear el QR.
+            </p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="verify-form">
+            <label for="code">Código de verificación</label>
+            <input id="code" type="text" inputmode="numeric" maxlength="6" formControlName="code"
+                placeholder="Ingresa los 6 dígitos" />
+
+            @if (form.controls.code.touched && form.controls.code.invalid) {
+            <small class="field-error">
+                Ingresa un código válido de 6 dígitos.
+            </small>
+            }
+
+            <div class="actions">
+                <button type="submit" [disabled]="loading() || form.invalid">
+                    Verificar y activar 2FA
+                </button>
+
+                <button type="button" class="secondary" (click)="reloadQr()" [disabled]="loading()">
+                    Generar nuevo QR
+                </button>
+            </div>
+        </form>
+        }
+    </div>
+</section>

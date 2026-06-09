@@ -19,8 +19,6 @@ const pool = mysql.createPool({
     waitForConnections: true
 });
 
-// POST /api/2fa/setup
-// Genera secreto TOTP + QR y lo guarda deshabilitado hasta verificar
 router.post('/setup', verifyToken, async (req, res) => {
     try {
         const userId = req.user.sub;
@@ -52,8 +50,6 @@ router.post('/setup', verifyToken, async (req, res) => {
     }
 });
 
-// POST /api/2fa/verify
-// Verifica el código del autenticador durante el setup inicial
 router.post('/verify', verifyToken, async (req, res) => {
     try {
         const userId = req.user.sub;
@@ -96,8 +92,6 @@ router.post('/verify', verifyToken, async (req, res) => {
     }
 });
 
-// POST /api/2fa/complete-login
-// Verifica el código TOTP cuando el login ya requiere 2FA
 router.post('/complete-login', async (req, res) => {
     try {
         const { tempToken, code } = req.body;
@@ -136,6 +130,11 @@ router.post('/complete-login', async (req, res) => {
             email: rows[0].email,
             role: rows[0].role
         });
+
+        await pool.query(
+            'UPDATE users SET last_login = NOW() WHERE id = ?',
+            [decoded.sub]
+        );
 
         return res.json({
             success: true,

@@ -18,7 +18,6 @@ const pool = mysql.createPool({
     waitForConnections: true
 });
 
-// POST /api/auth/login
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -37,37 +36,16 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Credenciales incorrectas' });
         }
 
-        const payload = {
-            sub: user.id,
-            email: user.email,
-            role: user.role
-        };
-
-        if (user.twofa_enabled) {
-            const tempToken = jwt.sign(
-                { sub: user.id, type: '2fa_pending' },
-                process.env.JWT_ACCESS_SECRET,
-                { expiresIn: '5m' }
-            );
-
-            return res.json({
-                requires2FA: true,
-                tempToken,
-                message: 'Ingresa el código de tu app autenticadora'
-            });
-        }
-
-        const tokens = generateTokens(payload);
-
-        await pool.query(
-            'UPDATE users SET last_login = NOW() WHERE id = ?',
-            [user.id]
+        const tempToken = jwt.sign(
+            { sub: user.id, type: '2fa_pending' },
+            process.env.JWT_ACCESS_SECRET,
+            { expiresIn: '5m' }
         );
 
         return res.json({
-            requires2FA: false,
-            ...tokens,
-            user: payload
+            requires2FA: true,
+            tempToken,
+            message: 'Ingresa el código de tu app autenticadora'
         });
     } catch (e) {
         console.error(e);
@@ -75,7 +53,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// POST /api/auth/refresh
 router.post('/refresh', async (req, res) => {
     try {
         const { refreshToken } = req.body;
@@ -87,7 +64,7 @@ router.post('/refresh', async (req, res) => {
         const decoded = verifyRefresh(refreshToken);
 
         const [rows] = await pool.query(
-            'SELECT id, email, role FROM users WHERE id = ? AND is_active = 1',
+            'SELECT id, name, email, role FROM users WHERE id = ? AND is_active = 1',
             [decoded.sub]
         );
 
@@ -107,7 +84,6 @@ router.post('/refresh', async (req, res) => {
     }
 });
 
-// GET /api/auth/me
 router.get('/me', verifyToken, async (req, res) => {
     try {
         const [rows] = await pool.query(

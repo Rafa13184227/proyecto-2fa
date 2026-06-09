@@ -1,5 +1,5 @@
-import { Component, computed, inject, signal, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -15,7 +15,7 @@ interface Course {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DatePipe],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -24,16 +24,28 @@ export class DashboardComponent implements OnInit {
   private router = inject(Router);
 
   user = this.auth.user;
-  profile = signal<any | null>(null);
+  profile = signal<{
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    last_login?: string | null;
+  } | null>(null);
 
   courses = signal<Course[]>([]);
-  loadingCourses = signal(false);
+  loadingCourses = signal<boolean>(false);
   coursesError = signal<string | null>(null);
 
   isAdmin = computed(() => this.user()?.role === 'admin');
   hasCourses = computed(() => this.courses().length > 0);
+  displayName = computed(() => this.profile()?.name || this.user()?.email || 'Usuario');
+  displayRole = computed(() => this.profile()?.role || this.user()?.role || 'user');
 
   ngOnInit(): void {
+    this.loadProfile();
+  }
+
+  loadProfile(): void {
     this.auth.me().subscribe({
       next: (res) => {
         this.profile.set(res.user);
@@ -42,7 +54,10 @@ export class DashboardComponent implements OnInit {
           this.loadCourses();
         }
       },
-      error: () => this.profile.set(null)
+      error: () => {
+        this.profile.set(null);
+        this.courses.set([]);
+      }
     });
   }
 
@@ -80,5 +95,9 @@ export class DashboardComponent implements OnInit {
 
   goToAdminAssignments(): void {
     this.router.navigate(['/admin/assignments']);
+  }
+
+  trackByCourseId(_: number, course: Course): number {
+    return course.id;
   }
 }

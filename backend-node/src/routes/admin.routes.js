@@ -18,10 +18,10 @@ router.get('/students', async (_req, res) => {
       ORDER BY id DESC
     `);
 
-    res.json({ students: rows });
+    return res.json({ students: rows });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al obtener estudiantes' });
+    return res.status(500).json({ error: 'Error al obtener estudiantes' });
   }
 });
 
@@ -34,10 +34,10 @@ router.get('/courses', async (_req, res) => {
       ORDER BY id DESC
     `);
 
-    res.json({ courses: rows });
+    return res.json({ courses: rows });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al obtener cursos' });
+    return res.status(500).json({ error: 'Error al obtener cursos' });
   }
 });
 
@@ -74,20 +74,18 @@ router.post('/users', async (req, res) => {
     const hash = await bcrypt.hash(password, 12);
 
     const [result] = await pool.query(
-      `
-      INSERT INTO users (name, email, password, role, is_active)
-      VALUES (?, ?, ?, ?, 1)
-      `,
+      `INSERT INTO users (name, email, password, role, is_active)
+       VALUES (?, ?, ?, ?, 1)`,
       [name.trim(), email.trim(), hash, role]
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Usuario creado correctamente',
       userId: result.insertId
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al crear usuario' });
+    return res.status(500).json({ error: 'Error al crear usuario' });
   }
 });
 
@@ -120,20 +118,18 @@ router.post('/courses', async (req, res) => {
     const teacherIdValue = teacher_id ? Number(teacher_id) : null;
 
     const [result] = await pool.query(
-      `
-      INSERT INTO courses (name, code, credits, teacher_id)
-      VALUES (?, ?, ?, ?)
-      `,
+      `INSERT INTO courses (name, code, credits, teacher_id)
+       VALUES (?, ?, ?, ?)`,
       [name.trim(), code.trim(), Number(credits), teacherIdValue]
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Curso creado correctamente',
       courseId: result.insertId
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al crear curso' });
+    return res.status(500).json({ error: 'Error al crear curso' });
   }
 });
 
@@ -147,12 +143,10 @@ router.post('/assignments', async (req, res) => {
     }
 
     const [[student]] = await pool.query(
-      `
-      SELECT id, name
-      FROM users
-      WHERE id = ? AND role = 'user' AND is_active = 1
-      LIMIT 1
-      `,
+      `SELECT id
+       FROM users
+       WHERE id = ? AND role = 'user' AND is_active = 1
+       LIMIT 1`,
       [student_id]
     );
 
@@ -161,12 +155,10 @@ router.post('/assignments', async (req, res) => {
     }
 
     const [[course]] = await pool.query(
-      `
-      SELECT id, name, code
-      FROM courses
-      WHERE id = ?
-      LIMIT 1
-      `,
+      `SELECT id
+       FROM courses
+       WHERE id = ?
+       LIMIT 1`,
       [course_id]
     );
 
@@ -175,12 +167,10 @@ router.post('/assignments', async (req, res) => {
     }
 
     const [existing] = await pool.query(
-      `
-      SELECT id
-      FROM enrollments
-      WHERE student_id = ? AND course_id = ?
-      LIMIT 1
-      `,
+      `SELECT id
+       FROM enrollments
+       WHERE student_id = ? AND course_id = ?
+       LIMIT 1`,
       [student_id, course_id]
     );
 
@@ -189,20 +179,18 @@ router.post('/assignments', async (req, res) => {
     }
 
     const [result] = await pool.query(
-      `
-      INSERT INTO enrollments (student_id, course_id, enrolled_at)
-      VALUES (?, ?, NOW())
-      `,
+      `INSERT INTO enrollments (student_id, course_id, enrolled_at)
+       VALUES (?, ?, NOW())`,
       [student_id, course_id]
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Curso asignado correctamente',
       enrollmentId: result.insertId
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al asignar curso' });
+    return res.status(500).json({ error: 'Error al asignar curso' });
   }
 });
 

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,11 +18,11 @@ export class Setup2faComponent implements OnInit {
 
   qrCodeUri = signal<string | null>(null);
   secret = signal<string | null>(null);
-  loading = signal(false);
+  loading = signal<boolean>(false);
   success = signal<string | null>(null);
   error = signal<string | null>(null);
 
-  form = this.fb.group({
+  form = this.fb.nonNullable.group({
     code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
   });
 
@@ -33,6 +33,7 @@ export class Setup2faComponent implements OnInit {
   loadSetupData(): void {
     this.loading.set(true);
     this.error.set(null);
+    this.success.set(null);
 
     this.auth.setup2FA().subscribe({
       next: (res) => {
@@ -57,9 +58,9 @@ export class Setup2faComponent implements OnInit {
     this.error.set(null);
     this.success.set(null);
 
-    this.auth.verifySetup2FA(this.form.value.code!).subscribe({
+    this.auth.verifySetup2FA(this.form.getRawValue().code).subscribe({
       next: () => {
-        this.success.set('2FA activado correctamente. Redirigiendo...');
+        this.success.set('2FA activado correctamente. Redirigiendo al dashboard...');
         this.loading.set(false);
         setTimeout(() => this.router.navigate(['/dashboard']), 1500);
       },
@@ -68,5 +69,9 @@ export class Setup2faComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  reloadQr(): void {
+    this.loadSetupData();
   }
 }
