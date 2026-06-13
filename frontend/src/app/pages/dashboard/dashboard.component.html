@@ -1,20 +1,24 @@
 <section class="dashboard-container">
     <header class="dashboard-header">
         <div>
-            <h1>Dashboard</h1>
-            <p class="welcome">
-                Bienvenido, <strong>{{ displayName() }}</strong>
-            </p>
-            <p class="meta">
-                Rol: {{ displayRole() }} · Correo: {{ profile()?.email || user()?.email }}
-            </p>
+            <h1>Bienvenido, {{ displayName() }}</h1>
+            <p>Rol: <strong>{{ displayRole() }}</strong></p>
+
+            @if (profile()?.last_login) {
+            <p>Último acceso: {{ profile()?.last_login | date:'medium' }}</p>
+            }
         </div>
 
         <div class="header-actions">
-            <button type="button" class="secondary" (click)="goToSetup2FA()">
+            <button type="button" (click)="goToSetup2FA()">
                 Configurar 2FA
             </button>
-            <button type="button" class="danger" (click)="logout()">
+
+            <button type="button" class="secondary" (click)="getBackupCodes()">
+                Códigos de respaldo
+            </button>
+
+            <button type="button" class="logout-btn" (click)="logout()">
                 Cerrar sesión
             </button>
         </div>
@@ -23,29 +27,45 @@
     @if (isAdmin()) {
     <section class="admin-panel">
         <h2>Panel de administración</h2>
-        <p>
-            Desde aquí puedes gestionar usuarios, roles y asignación de cursos.
-        </p>
+        <p>Desde aquí puedes gestionar usuarios, roles y asignación de cursos.</p>
+
+        @if (backupError()) {
+        <div class="error-box">{{ backupError() }}</div>
+        }
 
         <div class="admin-actions">
-            <button type="button" (click)="goToAdminUsers()">Gestionar usuarios</button>
-            <button type="button" (click)="goToAdminCourses()">Gestionar cursos</button>
-            <button type="button" (click)="goToAdminAssignments()">Asignaciones</button>
+            <button type="button" (click)="goToAdminUsers()">
+                Gestionar usuarios
+            </button>
+
+            <button type="button" (click)="goToAdminCourses()">
+                Gestionar cursos
+            </button>
+
+            <button type="button" (click)="goToAdminAssignments()">
+                Gestionar asignaciones
+            </button>
         </div>
     </section>
     } @else {
-    <section class="courses-section">
+    <section class="courses-panel">
         <h2>Mis cursos</h2>
 
         @if (loadingCourses()) {
-        <div class="info-box">
-            Cargando cursos...
-        </div>
-        } @else if (coursesError()) {
-        <div class="alert error">
+        <p>Cargando cursos...</p>
+        }
+
+        @if (backupError()) {
+        <div class="error-box">{{ backupError() }}</div>
+        }
+
+        @if (coursesError()) {
+        <div class="error-box">
             {{ coursesError() }}
         </div>
-        } @else if (hasCourses()) {
+        }
+
+        @if (!loadingCourses() && !coursesError() && hasCourses()) {
         <div class="courses-grid">
             @for (course of courses(); track trackByCourseId($index, course)) {
             <article class="course-card">
@@ -60,11 +80,41 @@
             </article>
             }
         </div>
-        } @else {
-        <div class="info-box">
-            No tienes cursos registrados.
-        </div>
+        }
+
+        @if (!loadingCourses() && !coursesError() && !hasCourses()) {
+        <p>No tienes cursos asignados todavía.</p>
         }
     </section>
+    }
+
+    @if (backupCodes(); as codes) {
+    <div class="modal-overlay" (click)="closeBackupCodes()">
+        <div class="modal" (click)="$event.stopPropagation()">
+            <h2>Códigos de respaldo</h2>
+            <p class="modal-warning">
+                Guardá estos códigos en un lugar seguro. Cada uno solo puede usarse una vez.
+                Si los agotás, generá un nuevo lote desde el dashboard.
+            </p>
+
+            <div class="codes-grid">
+                @for (code of codes; track $index) {
+                <div class="code-item">
+                    <span class="code-index">{{ $index + 1 }}</span>
+                    <code>{{ code }}</code>
+                </div>
+                }
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="secondary" (click)="downloadBackupCodes()">
+                    Descargar .txt
+                </button>
+                <button type="button" (click)="closeBackupCodes()">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
     }
 </section>

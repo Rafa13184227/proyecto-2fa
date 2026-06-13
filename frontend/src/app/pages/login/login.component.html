@@ -1,12 +1,15 @@
 <div class="auth-container">
     <div class="auth-card">
-        <h1>Iniciar sesión</h1>
-        <p>Ingresa tu correo y contraseña para continuar.</p>
+        <div class="brand-header">
+            <div class="brand-icon">RafaU</div>
+            <h1>Iniciar sesión</h1>
+            <p>Ingresa tu correo y contraseña para acceder al sistema universitario.</p>
+        </div>
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
             <div class="form-group">
                 <label for="email">Correo electrónico</label>
-                <input id="email" type="email" formControlName="email" placeholder="admin@test.com" />
+                <input id="email" type="email" formControlName="email" placeholder="correo@universidad.edu" />
 
                 @if (form.get('email')?.touched && form.get('email')?.invalid) {
                 <small class="error-text">

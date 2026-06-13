@@ -1,0 +1,132 @@
+.setup-2fa-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  animation: fadeIn 0.4s ease;
+}
+
+.setup-card {
+  background: var(--color-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 520px;
+
+  h1 {
+    text-align: center;
+    margin-bottom: 0.35rem;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.75rem;
+    line-height: 1.5;
+  }
+}
+
+.info-box {
+  background: var(--color-primary-lighter);
+  color: var(--color-primary-light);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.qr-section {
+  text-align: center;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin-bottom: 0.75rem;
+  }
+}
+
+.qr-image {
+  max-width: 200px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  background: #fff;
+}
+
+.secret-section {
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.secret-box {
+  background: #f3f4f6;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  word-break: break-all;
+  color: var(--color-text);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.helper-text {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.verify-form {
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-family: var(--font);
+    color: var(--color-text);
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-align: center;
+    letter-spacing: 0.5em;
+    font-weight: 600;
+
+    &:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.2);
+      background: #fff;
+    }
+  }
+}
+
+.field-error {
+  display: block;
+  color: var(--color-error);
+  font-size: 0.78rem;
+  margin-top: 0.3rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+
+  button {
+    flex: 1;
+  }
+}

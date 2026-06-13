@@ -1,14 +1,13 @@
 <?php
-
 declare(strict_types=1);
 
 use Firebase\JWT\JWT;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use RobThree\Auth\Providers\Qr\QRServerProvider;
 use RobThree\Auth\TwoFactorAuth;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
-class AuthController
+final class AuthController
 {
     private TwoFactorAuth $tfa;
 
@@ -22,11 +21,11 @@ class AuthController
 
     public function register(Request $req, Response $res): Response
     {
-        $body = $req->getParsedBody();
+        $body = $req->getParsedBody() ?? [];
 
-        $name = trim($body['name'] ?? '');
-        $email = trim($body['email'] ?? '');
-        $pass = $body['password'] ?? '';
+        $name = trim((string)($body['name'] ?? ''));
+        $email = trim((string)($body['email'] ?? ''));
+        $pass = (string)($body['password'] ?? '');
 
         if ($name === '') {
             return $this->json($res, ['error' => 'El nombre es obligatorio'], 400);
@@ -89,10 +88,10 @@ class AuthController
 
     public function login(Request $req, Response $res): Response
     {
-        $body = $req->getParsedBody();
+        $body = $req->getParsedBody() ?? [];
 
-        $email = trim($body['email'] ?? '');
-        $pass = $body['password'] ?? '';
+        $email = trim((string)($body['email'] ?? ''));
+        $pass = (string)($body['password'] ?? '');
 
         $db = Database::getInstance();
 
@@ -123,7 +122,7 @@ class AuthController
     public function logout(Request $req, Response $res): Response
     {
         $body = $req->getParsedBody() ?? [];
-        $refreshToken = trim($body['refreshToken'] ?? '');
+        $refreshToken = trim((string)($body['refreshToken'] ?? ''));
         $userId = (int)$req->getAttribute('userId');
 
         if ($refreshToken === '') {

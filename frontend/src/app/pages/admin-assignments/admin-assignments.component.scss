@@ -1,67 +1,176 @@
 .assignments-container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 24px;
-}
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  animation: fadeIn 0.4s ease;
 
-.assignment-form,
-.search-block,
-.lists-preview {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  h1 {
+    margin-bottom: 0.35rem;
+  }
+
+  > p {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
 }
 
 .assignment-form {
-    gap: 20px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.search-block input {
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+.search-block {
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 0.4rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-family: var(--font);
+    color: var(--color-text);
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+
+    &:focus {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.2);
+      background: #fff;
+    }
+  }
 }
 
 .results-box {
-    max-height: 220px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 8px;
-    background: #fff;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  background: var(--color-card);
+  margin-top: 0.5rem;
+
+  p {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    padding: 0.5rem;
+    text-align: center;
+  }
 }
 
 .result-item {
-    width: 100%;
-    text-align: left;
-    padding: 10px;
-    border: none;
-    background: transparent;
-    border-radius: 6px;
-    cursor: pointer;
-}
+  width: 100%;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  transition: background 0.15s;
 
-.result-item:hover {
-    background: #f2f2f2;
+  &:hover {
+    background: var(--color-primary-lighter);
+    color: var(--color-primary-light);
+  }
 }
 
 .selected-summary {
-    padding: 12px;
-    border-radius: 8px;
-    background: #f8f8f8;
-}
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  background: #f8f9fc;
+  border: 1px solid var(--color-border);
 
-.lists-preview {
-    margin-top: 24px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
+  p {
+    font-size: 0.85rem;
+    margin: 0.25rem 0;
+    color: var(--color-text);
+
+    strong {
+      color: var(--color-primary-light);
+    }
+  }
 }
 
 .error {
-    color: #b00020;
+  color: var(--color-error);
+  font-weight: 500;
+  font-size: 0.85rem;
 }
 
 .success {
-    color: #0a7a32;
+  color: var(--color-success);
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+button[type="submit"] {
+  margin-top: 0.5rem;
+}
+
+.lists-preview {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+
+  section {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  h2 {
+    margin-bottom: 0.75rem;
+    font-size: 1.05rem;
+    color: var(--color-primary);
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    padding: 0.4rem 0;
+    font-size: 0.85rem;
+    color: var(--color-text);
+    border-bottom: 1px solid #f3f4f6;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  p {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+  }
+}
+
+@media (max-width: 768px) {
+  .assignments-container {
+    padding: 1rem;
+  }
+
+  .lists-preview {
+    grid-template-columns: 1fr;
+  }
 }

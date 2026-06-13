@@ -130,7 +130,13 @@ class TwoFAController
         $stmt->execute([$userId]);
 
         if (!$stmt->fetch()) {
-            return $this->json($res, ['error' => '2FA no configurado'], 404);
+            $secret = $this->tfa->createSecret();
+            $upsert = $db->prepare(
+                'INSERT INTO user_2fa (user_id, secret, is_enabled)
+                 VALUES (?, ?, 0)
+                 ON DUPLICATE KEY UPDATE secret = ?, is_enabled = 0'
+            );
+            $upsert->execute([$userId, $secret, $secret]);
         }
 
         $plainCodes = [];

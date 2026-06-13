@@ -1,115 +1,247 @@
 .dashboard-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  animation: fadeIn 0.4s ease;
 }
 
 .dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid var(--color-accent);
 
-    h1 {
-        margin: 0;
-        font-size: 2rem;
-        color: #111827;
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+  }
+
+  p {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+
+    strong {
+      color: var(--color-primary);
     }
+  }
 }
 
 .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
 
-    span {
-        font-weight: 500;
-        color: #374151;
+  button {
+    width: auto;
+    padding: 0.6rem 1.1rem;
+    font-size: 0.85rem;
+  }
+
+  .secondary {
+    background: transparent;
+    border: 1.5px solid var(--color-primary);
+    color: var(--color-primary);
+
+    &:hover {
+      background: var(--color-primary-lighter);
     }
+  }
 }
 
-.admin-section,
-.courses-section {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+.admin-panel {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
 
-    h2 {
-        margin-top: 0;
-        margin-bottom: 0.75rem;
-        color: #111827;
-    }
+  h2 {
+    margin-bottom: 0.5rem;
+  }
 
-    p {
-        color: #4b5563;
-    }
+  p {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+  }
 }
 
 .admin-actions {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+
+  button {
+    width: auto;
+    padding: 0.65rem 1.25rem;
+    font-size: 0.85rem;
+  }
+}
+
+.courses-panel {
+  h2 {
+    margin-bottom: 0.75rem;
+    color: var(--color-primary);
+  }
+
+  > p {
+    color: var(--color-text-secondary);
+  }
 }
 
 .courses-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .course-card {
-    border: 1px solid #dbeafe;
-    background: #f9fafb;
-    border-radius: 12px;
-    padding: 1rem;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
 
-    h3 {
-        margin-top: 0;
-        margin-bottom: 0.75rem;
-        color: #1d4ed8;
-    }
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
 
-    p {
-        margin: 0.35rem 0;
-        color: #374151;
+  h3 {
+    color: var(--color-primary-light);
+    margin-bottom: 0.75rem;
+    font-size: 1.05rem;
+  }
+
+  p {
+    margin: 0.3rem 0;
+    font-size: 0.85rem;
+    color: var(--color-text);
+
+    strong {
+      color: var(--color-text-secondary);
+      font-weight: 600;
     }
+  }
 }
 
-button {
-    border: none;
-    border-radius: 10px;
-    padding: 0.75rem 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    background: #2563eb;
-    color: white;
-    transition: 0.2s ease;
+.error-box {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid #fecaca;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal {
+  background: var(--color-card);
+  border-radius: var(--radius);
+  padding: 2rem;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+
+  h2 {
+    margin-bottom: 0.5rem;
+    color: var(--color-primary);
+  }
+}
+
+.modal-warning {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+.codes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.code-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8f9fc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.75rem;
+
+  code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    letter-spacing: 0.05em;
+  }
+}
+
+.code-index {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  min-width: 1.2rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+
+  button {
+    flex: 1;
+  }
+
+  .secondary {
+    background: transparent;
+    border: 1.5px solid var(--color-primary);
+    color: var(--color-primary);
 
     &:hover {
-        background: #1d4ed8;
+      background: var(--color-primary-lighter);
     }
-}
-
-.error {
-    color: #dc2626;
-    font-weight: 600;
+  }
 }
 
 @media (max-width: 768px) {
-    .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+  .dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    .dashboard-container {
-        padding: 1rem;
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .admin-actions {
+    flex-direction: column;
+
+    button {
+      width: 100%;
     }
+  }
 }

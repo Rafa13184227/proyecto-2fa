@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import mysql from 'mysql2/promise';
+import crypto from 'crypto';
 import { verifyToken } from '../middleware/verifyToken.js';
 import { generateTokens } from '../utils/jwtHelper.js';
 
@@ -13,11 +14,15 @@ const router = express.Router();
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT || 3306),
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
     waitForConnections: true
 });
+
+const hashToken = (token) =>
+    crypto.createHash('sha256').update(token).digest('hex');
 
 router.post('/setup', verifyToken, async (req, res) => {
     try {
@@ -130,6 +135,15 @@ router.post('/complete-login', async (req, res) => {
             email: rows[0].email,
             role: rows[0].role
         });
+
+        const refreshHash = hashToken(tokens.refreshToken);
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+        await pool.query(
+            `INSERT INTO refresh_tokens (user_id, token_hash, expires_at, revoked)
+       VALUES (?, ?, ?, 0)`,
+            [decoded.sub, refreshHash, expiresAt]
+        );
 
         await pool.query(
             'UPDATE users SET last_login = NOW() WHERE id = ?',

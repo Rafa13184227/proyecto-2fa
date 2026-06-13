@@ -18,7 +18,7 @@ interface JwtPayload extends User {
   iss?: string;
 }
 
-interface LoginResponse {
+export interface LoginResponse {
   requires2FA: boolean;
   tempToken?: string;
   accessToken?: string;
@@ -26,17 +26,17 @@ interface LoginResponse {
   user?: User;
 }
 
-interface TokenResponse {
+export interface TokenResponse {
   accessToken: string;
   refreshToken: string;
 }
 
-interface Setup2FAResponse {
+export interface Setup2FAResponse {
   secret: string;
   qrCodeUri: string;
 }
 
-interface MeResponse {
+export interface MeResponse {
   user: {
     id: number;
     name: string;
@@ -46,7 +46,7 @@ interface MeResponse {
   };
 }
 
-interface Course {
+export interface Course {
   id: number;
   name: string;
   code: string;
@@ -55,8 +55,13 @@ interface Course {
   enrolled_at?: string;
 }
 
-interface CoursesResponse {
+export interface CoursesResponse {
   courses: Course[];
+}
+
+export interface BackupCodesResponse {
+  message: string;
+  codes: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -66,7 +71,7 @@ export class AuthService {
   private platformId = inject(PLATFORM_ID);
 
   private _user = signal<User | null>(null);
-  private _loading = signal<boolean>(false);
+  private _loading = signal(false);
 
   readonly user = this._user.asReadonly();
   readonly loading = this._loading.asReadonly();
@@ -74,6 +79,7 @@ export class AuthService {
   readonly isAdmin = computed(() => this._user()?.role === 'admin');
 
   private readonly NODE_URL = environment.nodeApiUrl;
+  private readonly PHP_URL = environment.phpApiUrl;
 
   constructor() {
     this.restoreSession();
@@ -157,15 +163,22 @@ export class AuthService {
     return this.http.get<CoursesResponse>(`${this.NODE_URL}/courses/my-courses`);
   }
 
+  generateBackupCodes(): Observable<BackupCodesResponse> {
+    return this.http.post<BackupCodesResponse>(`${this.PHP_URL}/2fa/backup-codes`, {});
+  }
+
   logout(): void {
-    if (this.isBrowser) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      sessionStorage.removeItem('2fa_temp');
+    const refreshToken = this.isBrowser ? localStorage.getItem('refresh_token') : null;
+
+    if (!refreshToken) {
+      this.clearSession();
+      return;
     }
 
-    this._user.set(null);
-    this.router.navigate(['/login']);
+    this.http.post(`${this.PHP_URL}/auth/logout`, { refreshToken }).subscribe({
+      next: () => this.clearSession(),
+      error: () => this.clearSession()
+    });
   }
 
   refreshAccessToken(): Observable<TokenResponse | null> {
@@ -199,6 +212,17 @@ export class AuthService {
 
     localStorage.setItem('access_token', access);
     localStorage.setItem('refresh_token', refresh);
+  }
+
+  private clearSession(): void {
+    if (this.isBrowser) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      sessionStorage.removeItem('2fa_temp');
+    }
+
+    this._user.set(null);
+    this.router.navigate(['/login']);
   }
 
   private decodeToken(token: string): JwtPayload {

@@ -1,18 +1,20 @@
 import {
   HttpErrorResponse,
+  HttpEvent,
+  HttpHandlerFn,
   HttpInterceptorFn,
-  HttpRequest,
-  HttpHandlerFn
+  HttpRequest
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, switchMap, throwError } from 'rxjs';
-import { AuthService } from '../services/auth.service';
+import { Observable, throwError } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
+import { AuthService, TokenResponse } from '../services/auth.service';
 
 export const jwtInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
-) => {
+): Observable<HttpEvent<unknown>> => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
@@ -33,7 +35,7 @@ export const jwtInterceptor: HttpInterceptorFn = (
 
       if (error.status === 401 && !isRefreshCall && !isLoginCall) {
         return auth.refreshAccessToken().pipe(
-          switchMap((res) => {
+          switchMap((res: TokenResponse | null) => {
             if (!res?.accessToken) {
               auth.logout();
               return throwError(() => error);

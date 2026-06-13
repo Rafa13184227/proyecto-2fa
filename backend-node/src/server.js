@@ -6,6 +6,7 @@ import Redis from 'ioredis';
 import authRoutes from './routes/auth.routes.js';
 import tfaRoutes from './routes/twofa.routes.js';
 import courseRoutes from './routes/course.routes.js';
+import adminRoutes from './routes/admin.routes.js';
 
 dotenv.config();
 
@@ -31,44 +32,34 @@ app.use(cors({
 
 app.use(express.json());
 
-const RATE_LIMIT_MAX = 5;
-const RATE_LIMIT_WINDOW_SECONDS = 15 * 60;
-
-app.use('/api/auth/login', async (req, res, next) => {
+// Rate limiter para login (Redis-based)
+const loginRateLimiter = async (req, res, next) => {
   try {
-    const ip =
-      req.headers['x-forwarded-for']?.toString().split(',')[0].trim() ||
-      req.ip ||
-      'unknown';
-
+    const ip = req.ip || req.connection?.remoteAddress || 'unknown';
     const key = `rl:login:${ip}`;
-    const attempts = await redis.incr(key);
-
-    if (attempts === 1) {
-      await redis.expire(key, RATE_LIMIT_WINDOW_SECONDS);
+    const current = await redis.incr(key);
+    if (current === 1) {
+      await redis.expire(key, 900);
     }
-
-    const ttl = await redis.ttl(key);
-
-    if (attempts > RATE_LIMIT_MAX) {
-      return res.status(429).json({
-        error: 'Demasiados intentos. Espera 15 minutos.',
-        retryAfterSeconds: ttl > 0 ? ttl : RATE_LIMIT_WINDOW_SECONDS
-      });
+    if (current > 5) {
+      return res.status(429).json({ error: 'Demasiados intentos. Intenta de nuevo en 15 minutos.' });
     }
-
     next();
-  } catch (error) {
-    console.error('Rate limiter error:', error);
-    return res.status(500).json({
-      error: 'No se pudo validar el rate limit'
-    });
+  } catch {
+    next();
   }
-});
+};
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth/login', loginRateLimiter);
+
+app.use('/api/auth', (req, res, next) => {
+  req.redis = redis;
+  next();
+}, authRoutes);
+
 app.use('/api/2fa', tfaRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/health', async (_, res) => {
   let redisStatus = 'disconnected';

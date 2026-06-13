@@ -37,7 +37,7 @@ export class LoginComponent {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
 
     this.auth.login(email!, password!).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         if (res.requires2FA) {
           this.router.navigate(['/verify-2fa'], {
             queryParams: { returnUrl }

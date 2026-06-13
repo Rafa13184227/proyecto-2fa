@@ -18,7 +18,7 @@ export class Setup2faComponent implements OnInit {
 
   qrCodeUri = signal<string | null>(null);
   secret = signal<string | null>(null);
-  loading = signal<boolean>(false);
+  loading = signal(false);
   success = signal<string | null>(null);
   error = signal<string | null>(null);
 
@@ -36,7 +36,7 @@ export class Setup2faComponent implements OnInit {
     this.success.set(null);
 
     this.auth.setup2FA().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.qrCodeUri.set(res.qrCodeUri);
         this.secret.set(res.secret);
         this.loading.set(false);

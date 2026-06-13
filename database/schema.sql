@@ -111,7 +111,7 @@ VALUES
     (
         'Administrador',
         'admin@test.com',
-        '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4oK6BbqXGa',
+        '$2b$12$EpdMnSzH0WPC2KmM5oLvY..KdX9T1SO4CcVetBB1mna31F7XfRGbm',
         'admin',
         1
     ) ON DUPLICATE KEY

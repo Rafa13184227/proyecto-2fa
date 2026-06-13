@@ -2,15 +2,47 @@
 
 declare(strict_types=1);
 
-use Dotenv\Dotenv;
+use Slim\Factory\AppFactory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$dotenv = Dotenv::createImmutable(dirname(__DIR__));
-$dotenv->load();
+$envFile = __DIR__ . '/../.env';
+
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+
+        if ($line === '' || str_starts_with($line, '#')) {
+            continue;
+        }
+
+        $parts = explode('=', $line, 2);
+
+        if (count($parts) === 2) {
+            $key = trim($parts[0]);
+            $value = trim($parts[1]);
+            $value = trim($value, '"\'');
+            $_ENV[$key] = $value;
+            putenv("{$key}={$value}");
+        }
+    }
+}
+
+$origin = $_ENV['CORS_ORIGIN'] ?? 'http://localhost:4200';
+
+header("Access-Control-Allow-Origin: {$origin}");
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Credentials: true');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 require __DIR__ . '/../config/database.php';
 require __DIR__ . '/Controllers/AuthController.php';
@@ -22,21 +54,6 @@ $app = AppFactory::create();
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
 $app->addErrorMiddleware((bool)($_ENV['APP_DEBUG'] ?? true), true, true);
-
-$app->options('/{routes:.+}', function (Request $req, Response $res) {
-    return $res;
-});
-
-$app->add(function (Request $req, $handler): Response {
-    $res = $handler->handle($req);
-    $origin = $_ENV['CORS_ORIGIN'] ?? 'http://localhost:4200';
-
-    return $res
-        ->withHeader('Access-Control-Allow-Origin', $origin)
-        ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
-        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-        ->withHeader('Access-Control-Allow-Credentials', 'true');
-});
 
 $app->get('/api/health', function (Request $req, Response $res) {
     $res->getBody()->write(json_encode(['status' => 'ok']));
