@@ -56,6 +56,9 @@ router.post('/login', async (req, res) => {
                 { expiresIn: '5m' }
             );
 
+            const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+            req.redis?.del(`rl:login:${ip}`);
+
             return res.json({
                 requires2FA: true,
                 tempToken,
@@ -82,6 +85,9 @@ router.post('/login', async (req, res) => {
             'UPDATE users SET last_login = NOW() WHERE id = ?',
             [user.id]
         );
+
+        const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+        req.redis?.del(`rl:login:${ip}`);
 
         return res.json({
             requires2FA: false,

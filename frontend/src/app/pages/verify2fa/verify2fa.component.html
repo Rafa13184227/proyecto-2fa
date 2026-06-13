@@ -3,18 +3,18 @@
         <div class="brand-header">
             <div class="brand-icon">U</div>
             <h1>Verificación en dos pasos</h1>
-            <p>Ingresa el código de 6 dígitos generado por tu aplicación autenticadora.</p>
+            <p>Ingresa el código de 6 dígitos de tu app autenticadora o un código de respaldo.</p>
         </div>
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
             <div class="form-group">
                 <label for="code">Código de verificación</label>
-                <input id="code" type="text" formControlName="code" maxlength="6" inputmode="numeric"
-                    placeholder="123456" class="code-input" />
+                <input id="code" type="text" formControlName="code" maxlength="9"
+                    placeholder="123456 o A1B2C3D4" class="code-input" />
 
                 @if (form.get('code')?.touched && form.get('code')?.invalid) {
                 <small class="error-text">
-                    El código debe tener exactamente 6 dígitos.
+                    El código es obligatorio.
                 </small>
                 }
             </div>

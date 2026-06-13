@@ -18,7 +18,7 @@ export class Verify2faComponent {
   private fb = inject(FormBuilder);
 
   form = this.fb.group({
-    code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]]
+    code: ['', Validators.required]
   });
 
   error = signal<string | null>(null);

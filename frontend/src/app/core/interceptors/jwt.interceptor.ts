@@ -32,8 +32,9 @@ export const jwtInterceptor: HttpInterceptorFn = (
     catchError((error: HttpErrorResponse) => {
       const isRefreshCall = req.url.includes('/auth/refresh');
       const isLoginCall = req.url.includes('/auth/login');
+      const is2FAComplete = req.url.includes('/2fa/complete-login');
 
-      if (error.status === 401 && !isRefreshCall && !isLoginCall) {
+      if (error.status === 401 && !isRefreshCall && !isLoginCall && !is2FAComplete) {
         return auth.refreshAccessToken().pipe(
           switchMap((res: TokenResponse | null) => {
             if (!res?.accessToken) {

@@ -32,7 +32,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Rate limiter para login (Redis-based)
+// Rate limiter para login (Redis)
 const loginRateLimiter = async (req, res, next) => {
   try {
     const ip = req.ip || req.connection?.remoteAddress || 'unknown';

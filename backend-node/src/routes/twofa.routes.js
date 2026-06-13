@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
@@ -97,6 +98,30 @@ router.post('/verify', verifyToken, async (req, res) => {
     }
 });
 
+async function completeLoginFlow(decoded, res) {
+    const tokens = generateTokens({
+        sub: decoded.sub,
+        email: decoded.email,
+        role: decoded.role
+    });
+
+    const refreshHash = hashToken(tokens.refreshToken);
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    await pool.query(
+        `INSERT INTO refresh_tokens (user_id, token_hash, expires_at, revoked)
+     VALUES (?, ?, ?, 0)`,
+        [decoded.sub, refreshHash, expiresAt]
+    );
+
+    await pool.query(
+        'UPDATE users SET last_login = NOW() WHERE id = ?',
+        [decoded.sub]
+    );
+
+    return res.json({ success: true, ...tokens });
+}
+
 router.post('/complete-login', async (req, res) => {
     try {
         const { tempToken, code } = req.body;
@@ -108,7 +133,7 @@ router.post('/complete-login', async (req, res) => {
         }
 
         const [rows] = await pool.query(
-            `SELECT u.email, u.role, f.secret
+            `SELECT u.email, u.role, f.secret, f.backup_codes
        FROM users u
        JOIN user_2fa f ON f.user_id = u.id
        WHERE u.id = ? AND f.is_enabled = 1`,
@@ -119,41 +144,46 @@ router.post('/complete-login', async (req, res) => {
             return res.status(404).json({ error: '2FA no habilitado' });
         }
 
-        const valid = speakeasy.totp.verify({
-            secret: rows[0].secret,
+        const userData = rows[0];
+        const cleanCode = String(code || '').replace(/\D/g, '');
+
+        const totpValid = cleanCode.length === 6 && speakeasy.totp.verify({
+            secret: userData.secret,
             encoding: 'base32',
-            token: String(code || '').replace(/\D/g, ''),
+            token: cleanCode,
             window: 1
         });
 
-        if (!valid) {
-            return res.status(401).json({ error: 'Código incorrecto o expirado' });
+        if (totpValid) {
+            decoded.email = userData.email;
+            decoded.role = userData.role;
+            return await completeLoginFlow(decoded, res);
         }
 
-        const tokens = generateTokens({
-            sub: decoded.sub,
-            email: rows[0].email,
-            role: rows[0].role
-        });
+        // Try backup codes
+        if (userData.backup_codes) {
+            const backupCodes = typeof userData.backup_codes === 'string'
+                ? JSON.parse(userData.backup_codes)
+                : userData.backup_codes;
+            const inputCode = String(code || '').replace(/\s/g, '').toUpperCase();
 
-        const refreshHash = hashToken(tokens.refreshToken);
-        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+            for (let i = 0; i < backupCodes.length; i++) {
+                const hash = backupCodes[i].replace(/^\$2y\$$/, '$2b$');
+                if (bcrypt.compareSync(inputCode, hash)) {
+                    backupCodes.splice(i, 1);
+                    await pool.query(
+                        'UPDATE user_2fa SET backup_codes = ? WHERE user_id = ?',
+                        [JSON.stringify(backupCodes), decoded.sub]
+                    );
 
-        await pool.query(
-            `INSERT INTO refresh_tokens (user_id, token_hash, expires_at, revoked)
-       VALUES (?, ?, ?, 0)`,
-            [decoded.sub, refreshHash, expiresAt]
-        );
+                    decoded.email = userData.email;
+                    decoded.role = userData.role;
+                    return await completeLoginFlow(decoded, res);
+                }
+            }
+        }
 
-        await pool.query(
-            'UPDATE users SET last_login = NOW() WHERE id = ?',
-            [decoded.sub]
-        );
-
-        return res.json({
-            success: true,
-            ...tokens
-        });
+        return res.status(401).json({ error: 'Código incorrecto o expirado' });
     } catch (e) {
         console.error(e);
         return res.status(401).json({
